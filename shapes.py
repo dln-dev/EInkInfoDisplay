@@ -135,18 +135,24 @@ class Text:
     def setFill(self, fill):
         self.__fill = fill
 
-    def setCenter(self, Img):
-        self.__upperLeftX -= Img.textsize(self.__text, font = self.__font)[0] // 2 
-        self.__upperLeftY -= Img.textsize(self.__text, font = self.__font)[1] // 2
+#    def setCenter(self, Img):
+#        self.__upperLeftX -= Img.textsize(self.__text, font = self.__font)[0] // 2 
+#        self.__upperLeftY -= Img.textsize(self.__text, font = self.__font)[1] // 2
 
 
     def draw(self, blackImg, redImg):
+        #self.__upperLeftX -= redImg.textsize(self.__text, font = self.__font)[0] // 2 
+        #self.__upperLeftY -= redImg.textsize(self.__text, font = self.__font)[1] // 2
         if self.__color == "red":
             #self.__drawRed()
-            redImg.text((self.__upperLeftX, self.__upperLeftY), self.__text, font = self.__font, fill = self.__fill)
+            redImg.text((self.__upperLeftX - redImg.textsize(self.__text, font = self.__font)[0] // 2, \
+                         self.__upperLeftY - redImg.textsize(self.__text, font = self.__font)[1] // 2), \
+                         self.__text, font = self.__font, fill = self.__fill)
         else:
             #self.__drawBlack()
-            blackImg.text((self.__upperLeftX, self.__upperLeftY), self.__text, font = self.__font, fill = self.__fill)
+            blackImg.text((self.__upperLeftX - blackImg.textsize(self.__text, font = self.__font)[0] // 2, \
+                           self.__upperLeftY - blackImg.textsize(self.__text, font = self.__font)[1] // 2), \
+                           self.__text, font = self.__font, fill = self.__fill)
 
 
     #def __drawRed(self):

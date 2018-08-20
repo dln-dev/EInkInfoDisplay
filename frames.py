@@ -30,8 +30,8 @@ class Frame:
 
     def addShape(self, shape):
         # shitty workaround for missing "textsize()" feature:
-        if shape.__class__.__name__ == "Text":
-            shape.setCenter(self.__redDraw)
+        #if shape.__class__.__name__ == "Text":
+        #    shape.setCenter(self.__redDraw)
         self.__shapes.append(shape)
         self.__drawn = False
 
