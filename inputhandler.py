@@ -1,4 +1,5 @@
-# Helper classes for common objects
+# Controller, catches signals and acts accordingly
+# This is planned to use a gesture sensor APDS-9660
 
 import epd4in2b
 from PIL import Image
@@ -41,6 +42,12 @@ class Rect:
 
     def getDrawRect(self):
         return self.__coords, self.__fill, self.__outline
+
+    def setColor(self, color):
+        self.__color = color
+
+    def setFill(self, fill):
+        self.__fill = fill
 
     def draw(self):
         if self.__color == "red":
@@ -125,6 +132,12 @@ class Text:
 
     def setText(self, text, center, color, height, fill):
         self.__init__(text, center, color, height, fill)
+
+    def setColor(self, color):
+        self.__color = color
+
+    def setFill(self, fill):
+        self.__fill = fill
 
     def draw(self):
         if self.__color == "red":
