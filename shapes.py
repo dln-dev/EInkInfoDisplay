@@ -1,188 +1,285 @@
 # Helper classes for common objects ("model")
 # This creates shapes, text etc. for the frames
 
-import epd4in2b
-from PIL import Image
+from abc import ABCMeta, abstractmethod
+#import epd4in2b
+#from PIL import Image
 from PIL import ImageFont
-from PIL import ImageDraw
+#from PIL import ImageDraw
 
 
-WIDTH = epd4in2b.EPD_WIDTH
-HEIGHT = epd4in2b.EPD_HEIGHT
+#WIDTH = epd4in2b.EPD_WIDTH
+#HEIGHT = epd4in2b.EPD_HEIGHT
+COLORS = {"black", "red"}
+FILLS = {0, 255}
 
+# Base class for all shapes
+class Shape(metaclass = ABCMeta):
+    @abstractmethod
+    def __init__(self, baseCoords, color, fill):   # "black" as default?
 
-class Rect:
-    def __init__(self, \
-                 upperLeftX = 0, \
-                 upperLeftY = 0, \
-                 lowerRightX = WIDTH - 1, \
-                 lowerRightY = HEIGHT - 1, \
-                 color = "black", \
-                 fill = 0, \
-                 outline = 0):
-        self.__coords = (upperLeftX, upperLeftY, lowerRightX, lowerRightY)
-        self.__color = color
-        self.__fill = fill
-        self.__outline = outline
+        self.baseCoords = baseCoords
 
-    def getCoords(self):
-        return self.__coords
+        if color in COLORS:
+            self.color = color
+        else:
+            raise ValueError("unrecognized color '%s'", color)
 
-    def getCenter(self):
-        return (self.__coords[0] + (self.__coords[2] - self.__coords[0]) // 2, \
-                self.__coords[1] + (self.__coords[3] - self.__coords[1]) // 2)
+        if fill in FILLS:
+            self.fill = fill
+        else:
+            raise ValueError("incorrect fill '%d'", fill)
+    
+    def setBaseCoords(self, coords):
+        self.baseCoords = coords
 
-    def getDrawRect(self):
-        return self.__coords, self.__fill, self.__outline
+    @abstractmethod
+    def setCenter(self, center):
+        pass
 
     def setColor(self, color):
-        self.__color = color
+        if color in COLORS:
+            self.color = color
+        else:
+            raise ValueError("unrecognized color '%s'", color)
+
 
     def setFill(self, fill):
-        self.__fill = fill
-        if fill == 0:
-            self.__outline = 255
+        if fill in FILLS:
+            self.fill = fill
+        else:
+            raise ValueError("unrecognized fill '%d'", fill)
+
+
+    def getBaseCoords(self):
+        return self.baseCoords
+
+
+    @abstractmethod
+    def getCenter(self):
+        pass
+
+
+    def swap(self):
+        if self.color == "black":
+            self.color == "red"
+        else:
+            self.color == "black"
+
+    def invert(self):
+        if self.fill == 0:
+            self.fill = 255
+        else:
+            self.fill = 0
+
+    # both ImageDraw objects are given, so that frame can simply call "draw()"
+    # there might be a better way, perhaps frame having two arrays of shapes
+    # but then switching color is awkward
+    @abstractmethod
+    def draw(self, blackDraw, redDraw):
+        pass
+
+
+
+class Rect(Shape):
+    def __init__(self, \
+                 upperLeftCoords, \
+                 lowerRightCoords, \
+                 color, \
+                 fill, \
+                 outline):    # defaults?
+
+        #Shape.__init__(self, self.getCenter(), color, fill)
+        self.coords = (upperLeftCoords[0], upperLeftCoords[1], \
+                         lowerRightCoords[0], lowerRightCoords[1]) 
+        Shape.__init__(self, self.getCenter(), color, fill) # -> baseCoords = center
+        #self.color = color
+        #self.fill = fill
+        if outline in FILLS: # use function call instead?
+            self.outline = outline
+        else:
+            raise ValueError("unrecognized outline: '%s'", outline)
+
+    def setCenter(self, center):
+        halfWidth  = (self.coords[2] - self.coords[0]) // 2
+        halfHeight = (self.coords[3] - self.coords[1]) // 2
+        self.coords = (center[0] - halfWidth, center[1] - halfHeight, \
+                         center[2] - halfWidth, center[3] - halfHeight)
+        self.setBaseCoords((self.coords[0], self.coords[1]))
+
+    def setOutline(self, outline):
+        if outline in FILLS:
+            self.outline = outline
+        else:
+            raise ValueError("unrecognized outline: '%s'", outline)
+
+
+    def getCoords(self):
+        return self.coords
+
+
+    def getCenter(self):
+        return (self.coords[0] + (self.coords[2] - self.coords[0]) // 2, \
+                self.coords[1] + (self.coords[3] - self.coords[1]) // 2)
+
 
     def draw(self, blackImg, redImg):
-        if self.__color == "red":
-            #self.__drawRed()
-            redImg.rectangle(self.__coords, self.__fill, self.__outline)
+        if self.color == "red":
+            redImg.rectangle(self.coords, self.fill, self.outline)
         else:
-            #self.__drawBlack()
-            blackImg.rectangle(self.__coords, self.__fill, self.__outline)
+            blackImg.rectangle(self.coords, self.fill, self.outline)
 
-    #def __drawRed(self):
-    #    redImg.rectangle(self.__coords, self.__fill, self.__outline)
 
-    #def __drawBlack(self):
-    #    blackImg.rectangle(self.__coords, self.__fill, self.__outline)
+class Text(Shape):
+    def __init__(self, text, center, color, fontsize, fill):
+        Shape.__init__(self, center, color, fill)
+        self.fontsize = fontsize
+        self.font = ImageFont.truetype('/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf', self.fontsize)
+        self.text = text
 
+    def setCenter(self, center):
+        self.setBaseCoords(center)
+
+    def setText(self, text):
+        self.text = text
+
+    def getCenter(self):
+        return self.baseCoords
+
+    def draw(self, blackImg, redImg):
+        if self.color == "red":
+            redImg.text((self.baseCoords[0] - redImg.textsize(self.text, font = self.font)[0] // 2, \
+                         self.baseCoords[1] - redImg.textsize(self.text, font = self.font)[1] // 2), \
+                         self.text, font = self.font, fill = self.fill)
+        else:
+            blackImg.text((self.baseCoords[0] - blackImg.textsize(self.text, font = self.font)[0] // 2, \
+                           self.baseCoords[1] - blackImg.textsize(self.text, font = self.font)[1] // 2), \
+                           self.text, font = self.font, fill = self.fill)
+
+### not possible, same methods ###
+### list of single Rect and single Text not helpful ###
+#class tableEntry(Rect, Text):
+#    def __init__(self, upperLeftCoords, lowerRightCoords, rColor, rFill, outline\
+#                       text, tColor, fontsize, tFill):
+#
+#        center = (upperLeftCoords[0] + (lowerRightCoords[0] - upperLeftCoords[0]) // 2, \
+#                  upperLeftCoords[1] + (lowerRightCoords[1] - upperLeftCoords[0]) //2
+#        Rect.__init__(self, upperLeftCoords, lowerRightCoords, rColor, rFill, outline)
+#        Text.__init__(self, text, center, tColor, fontsize, tFill)
+#
+#    def draw(self):
+#        Rect.draw()
+#        Text.draw()
 
 
 class Table(Rect):
     def __init__(self, \
-                 upperLeftX = 0, \
-                 upperLeftY = 0, \
-                 lowerRightX = WIDTH - 1, \
-                 lowerRightY = HEIGHT - 1, \
-                 color = "black", \
-                 fill = 0, \
-                 outline = 0, \
-                 dimX = 1, \
-                 dimY = 1, \
-                 textArray = []):
-        self.__coords = (min(WIDTH - 2, max(0, upperLeftX)), \
-                         min(HEIGHT - 2, max(0, upperLeftY)), \
-                         max(1, min(WIDTH - 1, lowerRightX)), \
-                         max(1, min(HEIGHT - 1, lowerRightY)))
-        self.__color = color
-        self.__fill = fill
-        self.__outline = outline
-        #Rect.__init__(upperLeftX, upperLeftY, lowerRightX, lowerRightY, color, fill, outline)
-        self.__dimX = dimX
-        self.__dimY = dimY
-        self.__entries = []
-        rectWidth = (self.__coords[2] - self.__coords[0]) // dimX
-        rectHeight = (self.__coords[3] - self.__coords[1]) // dimY
-        for i in range(0, self.__dimX):
-            for j in range(0, self.__dimY):
-                self.__entries.append(Rect(self.__coords[0] + i * rectWidth, \
-                                         self.__coords[1] + j * rectHeight, \
-                                         self.__coords[0] + (i+1) * rectWidth, \
-                                         self.__coords[1] + (j+1) * rectHeight, \
-                                         self.__color, \
-                                         self.__fill, \
-                                         self.__outline))
-                                         #' ', (WIDTH // 2, HEIGHT // 2), "black", 0, 255))
+                 upperLeftCoords, \
+                 lowerRightCoords, \
+                 color, \
+                 fill, \
+                 outline, \
+                 dimX, \
+                 dimY):
 
-    def getRect(self, pos):
-        return self.__entries[pos]
+        Rect.__init__(self, upperLeftCoords, lowerRightCoords, color, fill, outline)
+        self.dimX = dimX
+        self.dimY = dimY
+        self.entries = []
+        self.rectWidth  = (self.coords[2] - self.coords[0]) // dimX
+        self.rectHeight = (self.coords[3] - self.coords[1]) // dimY
+ 
+    def __newCenter(self):
+        if len(self.entries) == 0:
+            return self.rectWidth  // 2 + self.coords[0], \
+                   self.rectHeight // 2 + self.coords[1]
+        else:
+            return ((self.entries[-1].getCenter()[0] + self.rectWidth - self.coords[0]) \
+                    % (self.dimX * self.rectWidth) + self.coords[0], \
+                    (self.entries[-1].getCenter()[1] + self.rectHeight - self.coords[1]) \
+                    % (self.dimY * self.rectHeight) + self.coords[1])
 
-    def setText(self, array):
-        for i in range(0, len(array)):
-            self.__entries[i].setText(textArray[i], self.__entries[i].getCenter(), "black", (HEIGHT-60) // 15, 0)
+    def __getRectCoords(self, center):
+        return [(center[0] - self.rectWidth  // 2,  \
+                 center[1] - self.rectHeight // 2), \
+                (center[0] + self.rectWidth  // 2,
+                 center[1] + self.rectHeight // 2)]
 
 
+    def fillRects(self, fill, outline):
+        for i in range(0, self.dimX * self.dimY):
+            self.entries.append(Rect(*self.__getRectCoords(self.__newCenter()), \
+                                self.color, fill, outline))
+
+    def addShape(self, shape):
+        if len(self.entries) < self.dimX * self.dimY:
+            shape.setCenter(self.__newCenter())
+            self.entries.append(shape)
+        else:
+            print("Table full")
 
     def draw(self, blackImg, redImg):  ### formerly drawTable(self)
-        for i in range(0, self.__dimX * self.__dimY):
-            self.__entries[i].draw(blackImg, redImg)
-
-
-class Text:
-    def __init__(self, text, center, color, height, fill):
-        self.__height = height
-        self.__font = ImageFont.truetype('/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf', self.__height)
-        self.__text = text
-#        self.__width, self.__height = redImg.textsize(text, font = self.__font)
-        self.__upperLeftX = center[0]# - ImageDraw.ImageDraw.textsize(self.__text, font = self.__font)[0] // 2  BROKEN WTF ---> Use "adjustFont() from frame object with images
-        self.__upperLeftY = center[1]# - ImageDraw.ImageDraw.textsize(self.__text, font = self.__font)[1] // 2
-        self.__color = color
-        self.__fill = fill
-
-    def setFill(self, fill):
-        self.__fill = fill
-
-    def getCoords(self):
-        return self.__upperLeftX, self.__upperLeftY
-
-    def setText(self, text, center, color, height, fill):
-        self.__init__(text, center, color, height, fill)
-
-    def setColor(self, color):
-        self.__color = color
-
-    def setFill(self, fill):
-        self.__fill = fill
-
-#    def setCenter(self, Img):
-#        self.__upperLeftX -= Img.textsize(self.__text, font = self.__font)[0] // 2 
-#        self.__upperLeftY -= Img.textsize(self.__text, font = self.__font)[1] // 2
-
-
-    def draw(self, blackImg, redImg):
-        #self.__upperLeftX -= redImg.textsize(self.__text, font = self.__font)[0] // 2 
-        #self.__upperLeftY -= redImg.textsize(self.__text, font = self.__font)[1] // 2
-        if self.__color == "red":
-            #self.__drawRed()
-            redImg.text((self.__upperLeftX - redImg.textsize(self.__text, font = self.__font)[0] // 2, \
-                         self.__upperLeftY - redImg.textsize(self.__text, font = self.__font)[1] // 2), \
-                         self.__text, font = self.__font, fill = self.__fill)
+        if self.color == "red":
+            redImg.rectangle(self.coords, self.fill, self.outline)
         else:
-            #self.__drawBlack()
-            blackImg.text((self.__upperLeftX - blackImg.textsize(self.__text, font = self.__font)[0] // 2, \
-                           self.__upperLeftY - blackImg.textsize(self.__text, font = self.__font)[1] // 2), \
-                           self.__text, font = self.__font, fill = self.__fill)
-
-
-    #def __drawRed(self):
-    #    redImg.text((self.__upperLeftX, self.__upperLeftY), self.__text, font = self.__font, fill = self.__fill)
-
-    #def __drawBlack(self):
-    #    blackImg.text((self.__upperLeftX, self.__upperLeftY), self.__text, font = self.__font, fill = self.__fill)
+            blackImg.rectangle(self.coords, self.fill, self.outline)
+        for entry in self.entries:
+            entry.draw(blackImg, redImg)
 
 
 
-class tableEntry(Text, Rect):
-    def __init__(self, text, center, tColor, height, tFill, \
-                 upperLeftX = 0, \
-                 upperLeftY = 0, \
-                 lowerRightX = WIDTH - 1, \
-                 lowerRightY = HEIGHT - 1, \
-                 color = "black", \
-                 fill = 0, \
-                 outline = 0):
-        Rect.__init__(self, \
-                 upperLeftX = 0, \
-                 upperLeftY = 0, \
-                 lowerRightX = WIDTH - 1, \
-                 lowerRightY = HEIGHT - 1, \
-                 color = "black", \
-                 fill = 0, \
-                 outline = 0)
-        Text.__init__(self, text, center, tColor, height, tFill)
-
-    def draw(self):
-        Rect.draw()
-        Text.draw()
-
+#class Table(Rect):
+#    def __init__(self, \
+#                 upperLeftCoords, \
+#                 lowerRightCoords, \
+#                 color, \
+#                 fill, \
+#                 outline, \
+#                 dimX, \
+#                 dimY):
+#
+#        Rect.__init__(self, upperLeftCoords, lowerRightCoords, color, fill, outline)
+#        self.dimX = dimX
+#        self.dimY = dimY
+#        self.rects = [] # max dimX * 
+#        self.texts = [] # dimY entries
+#
+#    def fillRects(self, color = self.color, fill = self.fill, outline = self.outline):
+#        rectWidth = (self.coords[2] - self.coords[0]) // dimX
+#        rectHeight = (self.coords[3] - self.coords[1]) // dimY
+#        for i in range(0, self.dimX):
+#            for j in range(0, self.dimY):
+#                self.rects.append(Rect((self.coords[0] + i * rectWidth, \
+#                                         self.coords[1] + j * rectHeight), \
+#                                        (self.coords[0] + (i+1) * rectWidth, \
+#                                         self.coords[1] + (j+1) * rectHeight), \
+#                                         color, \
+#                                         fill, \
+#                                         outline))
+#
+#    def fillTexts(self, texts, color = self.color, fill = self.fill):
+#        rectWidth = (self.coords[2] - self.coords[0]) // dimX
+#        rectHeight = (self.coords[3] - self.coords[1]) // dimY
+#        fontsize = 2 * rectHeight // 3
+#        for i in range(0, self.dimX):
+#            for j in range(0, self.dimY):
+#                self.texts.append(Text(texts[i*dimY + j], \
+#                                         (self.coords[0] + (i + 0.5) * rectWidth, \
+#                                          self.coords[1] + (j + 0.5) * rectHeight), \
+#                                          color, fontsize, fill))
+#
+#    def getRect(self, pos):
+#        return self.Rects[pos]
+#
+#    def getText(self, pos):
+#        return self.texts[pos]
+#
+#
+#    def draw(self, blackImg, redImg):  ### formerly drawTable(self)
+#        for i in range(0, self.dimX * self.dimY):
+#            self.entries[i].draw(blackImg, redImg)
+#        if self.color == "red":
+#            redImg.rectangle(self.coords, self.fill, self.outline)
+#        else:
+#            blackImg.rectangle(self.coords, self.fill, self.outline)
+#

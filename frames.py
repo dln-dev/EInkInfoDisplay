@@ -1,13 +1,13 @@
 # Frame creator and manipulator ("view")
 # Here, all frames are created and displayed
 
-import shapes
+#import shapes
 import epd4in2b
 from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
-COLORED = 1
-UNCOLORED = 0
+#COLORED = 1
+#UNCOLORED = 0
 #
 # Display dimensions (pixel)
 WIDTH = epd4in2b.EPD_WIDTH
@@ -25,8 +25,9 @@ class Frame:
         if not colors == "black":
             self.__redImg = Image.new('1', (WIDTH, HEIGHT), 255)    # 255: clear the frame
             self.__redDraw = ImageDraw.Draw(self.__redImg)
-            self.__shapes = []
-            self.__drawn = False
+
+        self.__shapes = []
+        self.__drawn = False
 
     def addShape(self, shape):
         # shitty workaround for missing "textsize()" feature:
