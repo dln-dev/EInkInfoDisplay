@@ -24,7 +24,7 @@
  # THE SOFTWARE.
  ##
 
-import newShapes
+import shapes
 import frames
 
 def main():
@@ -38,37 +38,25 @@ def main():
 
     # Setup frames
     training = frames.Frame("both")
-    table = newShapes.Table((0, titleHeight), (399, 299), "black", 255, 0, 3, 10)
-    rectTable = newShapes.Table((0, titleHeight), (399, 299), "black", 255, 0, 3, 10)
+    table = shapes.Table((0, titleHeight+1), (399, 299), "black", 255, 0, 3, 10)
 
-    rectTable.fillRects(255,0)
 
     # Setup some shapes
-    titleRect = newShapes.Rect((0, 0), (400, titleHeight), "red", 0, 0)
-    #table = shapes.Table(0, titleHeight + 1, frames.WIDTH - 1, frames.HEIGHT - 1, "black", 255, 0, 3, 10)
-    title = newShapes.Text('Liegestuetz', titleRect.getCenter(), "red", titleHeight // 3 * 2, 255)
+    titleRect = shapes.Rect((0, 0), (400, titleHeight), "red", 0, 0)
+    title = shapes.Text('Liegestuetz', titleRect.getCenter(), "red", titleHeight // 3 * 2, 255)
     for i in range(0, len(setArray)-1):
-        #sets.append(newShapes.Text(setArray[i], table.getRect(i).getCenter(), "black", (frames.HEIGHT-titleHeight) // 15, 0))
-        sets.append(newShapes.Text(setArray[i], (0,0), "black", (frames.HEIGHT - titleHeight) // 15, 0))
+        sets.append(shapes.Text(setArray[i], (0,0), "black", (frames.HEIGHT - titleHeight) // 15, 0))
         table.addShape(sets[i])
-#        training.addShape(shapes.Text(setArray[i], table.getRect(i).getCenter(), "black", (frames.HEIGHT-titleHeight) // 15, 0))
 
+    table.addBackground("black", 255, 0)
 
-    #for i in range(0,5):
-    #    table.getRect(i).setFill(0)
-    #    sets[i].setFill(255)
-
-    #table.getRect(5).setColor("red")
-    #table.getRect(5).setFill(0)
-    #sets[5].setColor("red")
-    #sets[5].setFill(255)
 
     # add shapes to training frame
     training.addShape(titleRect)
     training.addShape(title)
-    training.addShape(rectTable)
     training.addShape(table)
-    # transmit frame to display
+
+# transmit frame to display
     training.display()
 
 if __name__ == '__main__':

@@ -104,7 +104,8 @@ class Rect(Shape):
         halfWidth  = (self.coords[2] - self.coords[0]) // 2
         halfHeight = (self.coords[3] - self.coords[1]) // 2
         self.coords = (center[0] - halfWidth, center[1] - halfHeight, \
-                         center[2] - halfWidth, center[3] - halfHeight)
+                       center[0] + halfWidth, center[1] + halfHeight)
+                        # center[2] - halfWidth, center[3] - halfHeight)
         self.setBaseCoords((self.coords[0], self.coords[1]))
 
     def setOutline(self, outline):
@@ -186,6 +187,7 @@ class Table(Rect):
         self.dimX = dimX
         self.dimY = dimY
         self.entries = []
+        self.background = None
         self.rectWidth  = (self.coords[2] - self.coords[0]) // dimX
         self.rectHeight = (self.coords[3] - self.coords[1]) // dimY
  
@@ -206,7 +208,7 @@ class Table(Rect):
                  center[1] + self.rectHeight // 2)]
 
 
-    def fillRects(self, fill, outline):
+    def __fillRects(self, fill, outline):
         for i in range(0, self.dimX * self.dimY):
             self.entries.append(Rect(*self.__getRectCoords(self.__newCenter()), \
                                 self.color, fill, outline))
@@ -218,11 +220,31 @@ class Table(Rect):
         else:
             print("Table full")
 
+    def addBackground(self, color, fill, outline):
+        self.background = Table((self.coords[0], self.coords[1]), \
+                                (self.coords[2], self.coords[3]), \
+                                 color, fill, outline, self.dimX, self.dimY)
+        self.background.__fillRects(fill, outline)
+
+    def removeBackground(self):
+        self.background = None
+
+    def invertBackground(self, places = None):
+        if places is None:
+            places = range(0, self.dimX, self.dimY)
+        for place in places:
+            self.background.getEntry(place).invert()
+
+    def getEntry(self, place):
+        return self.entries[place]
+
     def draw(self, blackImg, redImg):  ### formerly drawTable(self)
         if self.color == "red":
             redImg.rectangle(self.coords, self.fill, self.outline)
         else:
             blackImg.rectangle(self.coords, self.fill, self.outline)
+        if self.background is not None:
+            self.background.draw(blackImg, redImg)
         for entry in self.entries:
             entry.draw(blackImg, redImg)
 
