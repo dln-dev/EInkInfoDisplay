@@ -157,21 +157,6 @@ class Text(Shape):
                            self.baseCoords[1] - blackImg.textsize(self.text, font = self.font)[1] // 2), \
                            self.text, font = self.font, fill = self.fill)
 
-### not possible, same methods ###
-### list of single Rect and single Text not helpful ###
-#class tableEntry(Rect, Text):
-#    def __init__(self, upperLeftCoords, lowerRightCoords, rColor, rFill, outline\
-#                       text, tColor, fontsize, tFill):
-#
-#        center = (upperLeftCoords[0] + (lowerRightCoords[0] - upperLeftCoords[0]) // 2, \
-#                  upperLeftCoords[1] + (lowerRightCoords[1] - upperLeftCoords[0]) //2
-#        Rect.__init__(self, upperLeftCoords, lowerRightCoords, rColor, rFill, outline)
-#        Text.__init__(self, text, center, tColor, fontsize, tFill)
-#
-#    def draw(self):
-#        Rect.draw()
-#        Text.draw()
-
 
 class Table(Rect):
     def __init__(self, \
@@ -181,15 +166,17 @@ class Table(Rect):
                  fill, \
                  outline, \
                  dimX, \
-                 dimY):
+                 dimY): # dim = number of entries in table
 
         Rect.__init__(self, upperLeftCoords, lowerRightCoords, color, fill, outline)
         self.dimX = dimX
         self.dimY = dimY
         self.entries = []
         self.background = None
-        self.rectWidth  = (self.coords[2] - self.coords[0]) // dimX
-        self.rectHeight = (self.coords[3] - self.coords[1]) // dimY
+        self.rectWidth  = round((self.coords[2] - self.coords[0]) / dimX)
+        self.rectHeight = round((self.coords[3] - self.coords[1]) / dimY) # rounding errors?
+        print("upperLeftCoords: ", upperLeftCoords, "\nlowerRightCoords: ", lowerRightCoords)
+        print("rectWidth: ", self.rectWidth, "\nrectHeight: ", self.rectHeight)
  
     def __newCenter(self):
         if len(self.entries) == 0:
@@ -209,9 +196,16 @@ class Table(Rect):
 
 
     def __fillRects(self, fill, outline):
-        for i in range(0, self.dimX * self.dimY):
-            self.entries.append(Rect(*self.__getRectCoords(self.__newCenter()), \
-                                self.color, fill, outline))
+        for i in range(0, self.dimX):
+            for j in range(0, self.dimY):
+                self.entries.append(Rect((self.coords[0] +     i * self.rectWidth, \
+                                          self.coords[1] +     j * self.rectHeight), \
+                                         (self.coords[0] + (i+1) * self.rectWidth, \
+                                          self.coords[1] + (j+1) * self.rectHeight), \
+                                          self.color, fill, outline))
+        #for i in range(0, self.dimX * self.dimY):
+        #    self.entries.append(Rect(*self.__getRectCoords(self.__newCenter()), \
+        #                        self.color, fill, outline))
 
     def addShape(self, shape):
         if len(self.entries) < self.dimX * self.dimY:
@@ -238,15 +232,30 @@ class Table(Rect):
     def getEntry(self, place):
         return self.entries[place]
 
-    def draw(self, blackImg, redImg):  ### formerly drawTable(self)
+    def __drawOutline(self, blackImg, redImg):
+        if self.rectHeight * self.dimY > self.coords[3] - self.coords[1]:
+            if self.color == "red":
+                redImg.line([(self.coords[0], self.coords[3]), \
+                             (self.coords[2], self.coords[3])], 0, 1)
+            else:
+                blackImg.line([(self.coords[0], self.coords[3]), \
+                             (self.coords[2], self.coords[3])], 0, 1)
+        if self.rectWidth * self.dimX > self.coords[2] - self.coords[0]:
+            if self.color == "red":
+                redImg.line(self.coords, 0, 1)
+            else:
+                blackImg.line(self.coords, 0, 1)
+
+    def draw(self, blackImg, redImg):  
         if self.color == "red":
             redImg.rectangle(self.coords, self.fill, self.outline)
         else:
             blackImg.rectangle(self.coords, self.fill, self.outline)
-        if self.background is not None:
+        if self.background: 
             self.background.draw(blackImg, redImg)
         for entry in self.entries:
             entry.draw(blackImg, redImg)
+        self.__drawOutline(blackImg, redImg) # if rounding errors, draw outline manually (prob wonky)
 
 
 

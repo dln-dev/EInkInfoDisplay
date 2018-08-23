@@ -38,11 +38,12 @@ def main():
 
     # Setup frames
     training = frames.Frame("both")
-    table = shapes.Table((0, titleHeight+1), (399, 299), "black", 255, 0, 3, 10)
+    table = shapes.Table((0, titleHeight+1), (frames.WIDTH - 1, frames.HEIGHT - 1), \
+                          "black", 255, 0, 3, 10) 
 
 
     # Setup some shapes
-    titleRect = shapes.Rect((0, 0), (400, titleHeight), "red", 0, 0)
+    titleRect = shapes.Rect((0, 0), (frames.WIDTH, titleHeight), "red", 0, 0)
     title = shapes.Text('Liegestuetz', titleRect.getCenter(), "red", titleHeight // 3 * 2, 255)
     for i in range(0, len(setArray)-1):
         sets.append(shapes.Text(setArray[i], (0,0), "black", (frames.HEIGHT - titleHeight) // 15, 0))
