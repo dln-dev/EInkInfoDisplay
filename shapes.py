@@ -62,9 +62,9 @@ class Shape(metaclass = ABCMeta):
 
     def swap(self):
         if self.color == "black":
-            self.color == "red"
+            self.color = "red"
         else:
-            self.color == "black"
+            self.color = "black"
 
     def invert(self):
         if self.fill == 0:
@@ -175,18 +175,17 @@ class Table(Rect):
         self.background = None
         self.rectWidth  = round((self.coords[2] - self.coords[0]) / dimX)
         self.rectHeight = round((self.coords[3] - self.coords[1]) / dimY) # rounding errors?
-        print("upperLeftCoords: ", upperLeftCoords, "\nlowerRightCoords: ", lowerRightCoords)
-        print("rectWidth: ", self.rectWidth, "\nrectHeight: ", self.rectHeight)
  
     def __newCenter(self):
         if len(self.entries) == 0:
             return self.rectWidth  // 2 + self.coords[0], \
                    self.rectHeight // 2 + self.coords[1]
-        else:
-            return ((self.entries[-1].getCenter()[0] + self.rectWidth - self.coords[0]) \
-                    % (self.dimX * self.rectWidth) + self.coords[0], \
+        else: # this must be easier...
+            return ((self.entries[0].getCenter()[0] + self.rectWidth * \
+                    (len(self.entries) // self.dimY) - self.coords[0]) \
+                    % (self.dimX * self.rectWidth)   + self.coords[0], \
                     (self.entries[-1].getCenter()[1] + self.rectHeight - self.coords[1]) \
-                    % (self.dimY * self.rectHeight) + self.coords[1])
+                    % (self.dimY * self.rectHeight)  + self.coords[1])
 
     def __getRectCoords(self, center):
         return [(center[0] - self.rectWidth  // 2,  \
@@ -223,11 +222,41 @@ class Table(Rect):
     def removeBackground(self):
         self.background = None
 
-    def invertBackground(self, places = None):
+    def invert(self, places = None):
         if places is None:
-            places = range(0, self.dimX, self.dimY)
+            places = range(0, self.dimX * self.dimY)
+        for place in places:
+            self.entries[place].invert()
+
+    def invertBackgrounds(self, places = None):
+        if places is None:
+            places = range(0, self.dimX * self.dimY)
         for place in places:
             self.background.getEntry(place).invert()
+
+    def invertCells(self, places = None):
+        if places is None:
+            places = range(0, self.dimX * self.dimY)
+        self.invert(places)
+        self.invertBackgrounds(places)
+
+    def swap(self, places):
+        if places is None:
+            places = range(0, self.dimX * self.dimY)
+        for place in places:
+            self.entries[place].swap()
+
+    def swapBackgrounds(self, places = None):
+        if places is None:
+            places = range(0, self.dimX * self.dimY)
+        for place in places:
+            self.background.getEntry(place).swap()
+
+    def swapCells(self, places):
+        if places is None:
+            places = range(0, self.dimX * self.dimY)
+        self.swap(places)
+        self.swapBackgrounds(places)
 
     def getEntry(self, place):
         return self.entries[place]

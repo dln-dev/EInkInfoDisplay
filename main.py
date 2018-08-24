@@ -51,6 +51,8 @@ def main():
 
     table.addBackground("black", 255, 0)
 
+    table.invertCells(range(0, 6))
+    table.swapCells([5])
 
     # add shapes to training frame
     training.addShape(titleRect)
