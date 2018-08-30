@@ -2,7 +2,10 @@ import frames
 import shapes
 import inputhandler
 import datetime
+from time import sleep
 import requests
+import click
+
 
 # Read input for text from file
 textfile = open("sets.txt", "r")
@@ -15,7 +18,7 @@ class EVI():
     def __init__(self):
         self.frames = []
         self.__addStartFrame()
-        self.currentFrame = 0
+        self.__currentFrame = 0
         self.frames[0].display()
 
         # create owm API call
@@ -131,11 +134,35 @@ class EVI():
         self.frames[-1].addShape(title)
         self.frames[-1].addShape(table)
 
+    def __refresh(self):
+        self.frames[self.__currentFrame].display()
+        #print("before sleep")
+        #sleep(15) # wait until refresh, so display()s won't stack up
+        #print("after sleep") # apparently display() blocks already
+
     def addFrame(self, frame):   # for custom frames
         self.frames.append(frame)
 
     def start(self):
-        pass
-        #inputhandler.start()
+
+        loop = True
+
+        #_left = 0
+        #_right = 0
+
+        while loop:
+            char = click.getchar()
+            if char == 'a': #and _left == 0:
+                self.__currentFrame = (self.__currentFrame - 1) % len(self.frames)
+                self.__refresh()
+                #_left = 1
+                #_right = 0
+            if char == 'd': # and _right == 0:
+                self.__currentFrame = (self.__currentFrame + 1) % len(self.frames)
+                self.__refresh()
+                #_left = 0
+                #_right = 1
+            if char == 'q':
+                loop = False
 
 
