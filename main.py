@@ -26,6 +26,8 @@
 
 import shapes
 import frames
+import evi 
+import click
 
 def main():
     # Read input for text from file
@@ -37,30 +39,64 @@ def main():
     titleHeight = 60
 
     # Setup frames
-    training = frames.Frame("both")
-    table = shapes.Table((0, titleHeight+1), (frames.WIDTH - 1, frames.HEIGHT - 1), \
-                          "black", 255, 0, 3, 10) 
+#    training = frames.Frame("both")
+#    crazyTable = frames.Frame("both")
 
+    # Setup some shapes for training frame
+#    table = shapes.Table((0, titleHeight+1), (frames.WIDTH - 1, frames.HEIGHT - 1), \
+#                          "black", 255, 0, 3, 10) 
+#    titleRect = shapes.Rect((0, 0), (frames.WIDTH, titleHeight), "red", 0, 0)
+#    title = shapes.Text('Liegestuetz', titleRect.getCenter(), "red", titleHeight // 3 * 2, 255)
+#    for i in range(0, len(setArray)-1):
+#        sets.append(shapes.Text(setArray[i], (0,0), "black", (frames.HEIGHT - titleHeight) // 15, 0))
+#        table.addShape(sets[i])
 
-    # Setup some shapes
-    titleRect = shapes.Rect((0, 0), (frames.WIDTH, titleHeight), "red", 0, 0)
-    title = shapes.Text('Liegestuetz', titleRect.getCenter(), "red", titleHeight // 3 * 2, 255)
-    for i in range(0, len(setArray)-1):
-        sets.append(shapes.Text(setArray[i], (0,0), "black", (frames.HEIGHT - titleHeight) // 15, 0))
-        table.addShape(sets[i])
+#    table.addBackground("black", 255, 0)
 
-    table.addBackground("black", 255, 0)
+#    table.invertCells(range(0, 6))
+#    table.swapCells([5])
 
-    table.invertCells(range(0, 6))
-    table.swapCells([5])
 
     # add shapes to training frame
-    training.addShape(titleRect)
-    training.addShape(title)
-    training.addShape(table)
+#    training.addShape(titleRect)
+#    training.addShape(title)
+#    training.addShape(table)
+
+    # Setup some shapes for the second frame
+#    cTable = shapes.Table((0,0), (frames.WIDTH-1, frames.HEIGHT-1), "black", 255, 0, 2, 2)
+#    cTable.addBackground("black", 255, 0)
+#    innerTable = shapes.Table((0,0), (frames.WIDTH/2, frames.HEIGHT/2), "black", 255, 0, 4, 4)
+#    innerTable.addBackground("red", 255, 0)
+#    cTable.addShape(innerTable)
+
+#    crazyTable.addShape(cTable)
+#    #crazyTable.addShape(innerTable)
+#    #crazyTable.addShape(cTable)
 
 # transmit frame to display
-    training.display()
+#    loop = True
+
+#    _left = 0
+#    _right = 0
+
+#    while loop:
+#        char = click.getchar()
+#        if char == 'a' and _left == 0:
+#            training.display()
+#            _left = 1
+#            _right = 0
+#        if char == 'd' and _right == 0:
+#            crazyTable.display()
+#            _left = 0
+#            _right = 1
+#        if char == 'q':
+#            loop = False
+
+    program = evi.EVI()
+    
+
+    #training.display()
+    #crazyTable.display()
 
 if __name__ == '__main__':
     main()

@@ -16,6 +16,7 @@ HEIGHT = epd4in2b.EPD_HEIGHT
 epd = epd4in2b.EPD()
 epd.init()
 
+VERSION = "0.1a"
 
 class Frame:
     def __init__(self, colors = "both"):
@@ -53,5 +54,6 @@ class Frame:
         if self.__drawn == False:
             self.draw()
         epd.display_frame(epd.get_frame_buffer(self.__blackImg), epd.get_frame_buffer(self.__redImg))
+
 
 

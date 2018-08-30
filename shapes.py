@@ -131,6 +131,52 @@ class Rect(Shape):
             blackImg.rectangle(self.coords, self.fill, self.outline)
 
 
+class Ellipse(Rect):
+    def __init__(self, \
+                 upperLeftCoords, \
+                 lowerRightCoords, \
+                 startAngle, \
+                 endAngle, \
+                 color, \
+                 fill, \
+                 outline):    # defaults?
+
+        self.startAngle = startAngle
+        self.endAngle   = endAngle
+        self.coords     = (upperLeftCoords[0],  upperLeftCoords[1], \
+                           lowerRightCoords[0], lowerRightCoords[1]) 
+        Rect.__init__(self, upperLeftCoords, lowerRightCoords, color, fill, outline) 
+        
+        if outline in FILLS: # use function call instead?
+            self.outline = outline
+        elif outline is None: # None: use pieslice, otherwise arc
+            self.outline = None
+        else:
+            raise ValueError("unrecognized outline: '%s'", outline)
+
+    def setOutline(self, outline):
+        if outline in FILLS:
+            self.outline = outline
+        elif outline is None:
+            self.outline = None
+        else:
+            raise ValueError("unrecognized outline: '%s'", outline)
+
+    def draw(self, blackImg, redImg):
+        if self.color == "red":
+            if self.outline is None:
+                redImg.arc([*self.coords], self.startAngle, self.endAngle, self.fill)
+            else:
+                redImg.pieslice([*self.coords], self.startAngle, self.endAngle, self.fill, self.outline)
+        else:
+            if self.outline is None:
+                blackImg.arc([*self.coords], self.startAngle, self.endAngle, self.fill)
+            else:
+                blackImg.pieslice([*self.coords], self.startAngle, self.endAngle, self.fill, self.outline)
+
+
+
+
 class Text(Shape):
     def __init__(self, text, center, color, fontsize, fill):
         Shape.__init__(self, center, color, fill)
@@ -287,59 +333,3 @@ class Table(Rect):
         self.__drawOutline(blackImg, redImg) # if rounding errors, draw outline manually (prob wonky)
 
 
-
-#class Table(Rect):
-#    def __init__(self, \
-#                 upperLeftCoords, \
-#                 lowerRightCoords, \
-#                 color, \
-#                 fill, \
-#                 outline, \
-#                 dimX, \
-#                 dimY):
-#
-#        Rect.__init__(self, upperLeftCoords, lowerRightCoords, color, fill, outline)
-#        self.dimX = dimX
-#        self.dimY = dimY
-#        self.rects = [] # max dimX * 
-#        self.texts = [] # dimY entries
-#
-#    def fillRects(self, color = self.color, fill = self.fill, outline = self.outline):
-#        rectWidth = (self.coords[2] - self.coords[0]) // dimX
-#        rectHeight = (self.coords[3] - self.coords[1]) // dimY
-#        for i in range(0, self.dimX):
-#            for j in range(0, self.dimY):
-#                self.rects.append(Rect((self.coords[0] + i * rectWidth, \
-#                                         self.coords[1] + j * rectHeight), \
-#                                        (self.coords[0] + (i+1) * rectWidth, \
-#                                         self.coords[1] + (j+1) * rectHeight), \
-#                                         color, \
-#                                         fill, \
-#                                         outline))
-#
-#    def fillTexts(self, texts, color = self.color, fill = self.fill):
-#        rectWidth = (self.coords[2] - self.coords[0]) // dimX
-#        rectHeight = (self.coords[3] - self.coords[1]) // dimY
-#        fontsize = 2 * rectHeight // 3
-#        for i in range(0, self.dimX):
-#            for j in range(0, self.dimY):
-#                self.texts.append(Text(texts[i*dimY + j], \
-#                                         (self.coords[0] + (i + 0.5) * rectWidth, \
-#                                          self.coords[1] + (j + 0.5) * rectHeight), \
-#                                          color, fontsize, fill))
-#
-#    def getRect(self, pos):
-#        return self.Rects[pos]
-#
-#    def getText(self, pos):
-#        return self.texts[pos]
-#
-#
-#    def draw(self, blackImg, redImg):  ### formerly drawTable(self)
-#        for i in range(0, self.dimX * self.dimY):
-#            self.entries[i].draw(blackImg, redImg)
-#        if self.color == "red":
-#            redImg.rectangle(self.coords, self.fill, self.outline)
-#        else:
-#            blackImg.rectangle(self.coords, self.fill, self.outline)
-#
