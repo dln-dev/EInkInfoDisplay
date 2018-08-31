@@ -10,8 +10,8 @@ from PIL import ImageDraw
 #UNCOLORED = 0
 #
 # Display dimensions (pixel)
-WIDTH = epd4in2b.EPD_WIDTH
-HEIGHT = epd4in2b.EPD_HEIGHT
+WIDTH = epd4in2b.EPD_WIDTH #- 1
+HEIGHT = epd4in2b.EPD_HEIGHT #- 1
 
 epd = epd4in2b.EPD()
 epd.init()
@@ -40,6 +40,9 @@ class Frame:
     def addShapes(self, shapes):
         for shape in  shapes:
             self.addShape(shape)
+
+    def getShape(self, pos):
+        return self.__shapes[pos]
 
     def removeShape(self, shape):
         print("removeShape(shape) not yet implemented")

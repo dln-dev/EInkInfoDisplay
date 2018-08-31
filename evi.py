@@ -5,7 +5,7 @@ import datetime
 from time import sleep
 import requests
 import click
-
+import json
 
 # Read input for text from file
 textfile = open("sets.txt", "r")
@@ -23,12 +23,15 @@ class EVI():
 
         # create owm API call
         owmkey = open("owmkey", "r")
-        self.owmApiCall = 'http://api.openweathermap.org/data/2.5/forecast?id=' \
-                          + "524901"\
-                          + '&APPID=' + owmkey.read()
+        # weather for testing, use forecast for final
+        self.__owmApiCall = ('http://api.openweathermap.org/data/2.5/weather?id=' \
+                          + '524901' \
+                          + '&APPID=' + owmkey.read()).split()[0]
+        #self.__owmApiCall.rsplit('\n')
         owmkey.close()
+        print(self.__owmApiCall)
 
-        self.currentWeather = {"temp" : 20, "wind" : "heavy", "clouds" : "cloudy"}
+        #self.currentWeather = {"temp" : 20, "wind" : "heavy", "clouds" : "cloudy"}
 
         #self.innerWeather = None
         #self.innerWeatherLastUpdate = None # necessary? use weatherlu?
@@ -81,30 +84,94 @@ class EVI():
 
     def __addWeatherFrame(self):
         self.frames.append(frames.Frame("both"))
+
+        #titleHeight = 60
+        
+        # dictionary of shapes for labeling ?
+        #self.frames[-1].addShapes([\
+        titleRect = shapes.Rect((0, 0), (frames.WIDTH, frames.HEIGHT // 4), "black", 0, 0)
+        sideTable = shapes.Table((0, frames.HEIGHT // 4), (frames.WIDTH // 3, frames.HEIGHT), \
+                             "black", 255, 0, 2, 6)
+        mainRect = shapes.Rect((frames.WIDTH // 3, frames.HEIGHT // 4), \
+                            (frames.WIDTH, (3 * frames.HEIGHT) // 4), "black", 255, 0)
+        bottomRect = shapes.Rect((frames.WIDTH // 3, (3 * frames.HEIGHT) // 4), \
+                            (frames.WIDTH, frames.HEIGHT), "black", 255, 0)
+        city = shapes.Text('City', (200, 25), "black", 25, 255)
+        date = shapes.Text('Date: ', (200, 60), "black", 25, 255)
+        temp = shapes.Text('Temperature: ', (200, 120), "black", 24, 0)
+        #wind = shapes.Text('Wind: ', (130, 230), "black", 20, 0)
+        clouds = shapes.Text('Clouds: ', (200, 190), "black", 20, 0)
+        weather = shapes.Text('weatherDesc', (200, 160), "black", 20, 0)
+        weatherMain = shapes.Picture((frames.WIDTH - 160, frames.HEIGHT // 4), \
+                               (frames.WIDTH, frames.HEIGHT // 4 + 160 ), \
+                               "black", 0, 0, "10d_black", "10d_red") 
+        #                    ])
+
+        sideTable.addShapes([shapes.Text('sunrise', (0,0), "black", 12, 0), \
+                           shapes.Text('sunset ', (0,0), "black", 12, 0), \
+                           shapes.Text('pressure', (0,0), "black", 12, 0), \
+                           shapes.Text('humidity', (0,0), "black", 12, 0), \
+                           shapes.Text('wind speed', (0,0), "black", 12, 0), \
+                           shapes.Text('wind direction', (0,0), "black", 12, 0), \
+                           shapes.Text('sunr', (0,0), "black", 12, 0), \
+                           shapes.Text('suns', (0,0), "black", 12, 0), \
+                           shapes.Text('press', (0,0), "black", 12, 0), \
+                           shapes.Text('humid', (0,0), "black", 12, 0), \
+                           shapes.Text('win', (0,0), "black", 12, 0), \
+                           shapes.Text('windir', (0,0), "black", 12, 0)])
+
+        sideTable.addBackground("black", 255, 0)
+
+        self.frames[-1].addShapes([titleRect, sideTable, mainRect, bottomRect, city, date, \
+                                   temp, clouds, weather, weatherMain])
+            
         self.updateWeather()
 
-        titleHeight = 60
-
-        self.frames[-1].addShapes([\
-                shapes.Rect((0, 0), (frames.WIDTH, titleHeight), "black", 0, 0), \
-                shapes.Text('Weather', (200, 30), "black", \
-                            titleHeight // 3 * 2, 255), \
-                shapes.Text('Temperature: ' + str(self.currentWeather["temp"]) + 'OC', \
-                            (130, 190), "black", 20, 0), \
-                shapes.Text('Wind: ' + self.currentWeather["wind"], \
-                            (130, 230), "black", 20, 0), \
-                shapes.Text('Clouds: ' + self.currentWeather["clouds"], \
-                            (130, 270), "black", 20, 0) \
-                            ])
-
-
     def updateWeather(self):
-        td = datetime.datetime.utcnow() - self.weatherLastUpdate
-        if td.seconds < 700:
-            # self.weather = requests.get(owmApiCall)
+            td = datetime.datetime.utcnow() - self.weatherLastUpdate
+        #if td.seconds < 700:
+            self.__currentWeather = requests.get(self.__owmApiCall).json()
+            print(self.__currentWeather)
+            #data = open('data.json', 'r')
+            #self.__currentWeather = json.loads(data.read())
+            #data.close()
+
+            self.frames[1].getShape(4).setText(self.__currentWeather["name"])
+            self.frames[1].getShape(5).setText(datetime.datetime.now().strftime("%d.%m.%Y  week %W"))
+            self.frames[1].getShape(6).setText(str(round(\
+                    self.__currentWeather["main"]["temp"] - 271.15, 2)) + "oC")
+#            self.frames[1].getShape(7).setText(str(self.__currentWeather["wind"]["speed"]))
+            self.frames[1].getShape(7).setText('clouds: ' + \
+                            str(self.__currentWeather["clouds"]["all"]) + '%')
+            self.frames[1].getShape(8).setText(str(self.__currentWeather["weather"][0]["description"]))
+            self.frames[1].getShape(9).setImgNames(self.__currentWeather["weather"][0]["icon"]\
+                                                    + "_black", \
+                                                    self.__currentWeather["weather"][0]["icon"]\
+                                                    + "_red")
+            #self.frames[1].draw()
+            self.frames[1].getShape(1).getEntry(6).setText( \
+                    datetime.datetime.utcfromtimestamp(\
+                            self.__currentWeather["sys"]["sunrise"]).strftime("%H:%M"))
+            self.frames[1].getShape(1).getEntry(7).setText( \
+                    datetime.datetime.utcfromtimestamp(\
+                            self.__currentWeather["sys"]["sunset"]).strftime("%H:%M"))
+            self.frames[1].getShape(1).getEntry(8).setText( \
+                    str(self.__currentWeather["main"]["pressure"]))           
+            self.frames[1].getShape(1).getEntry(9).setText( \
+                    str(self.__currentWeather["main"]["humidity"]))
+            self.frames[1].getShape(1).getEntry(10).setText( \
+                    str(self.__currentWeather["wind"]["speed"]))
+            self.frames[1].getShape(1).getEntry(11).setText( \
+                    str(self.__currentWeather["wind"]["deg"]))           
+             
+
+            
             self.weatherLastUpdate = datetime.datetime.utcnow()
-        else:
-            pass
+
+            if self.__currentFrame == 1:
+                self.__refresh()
+        #else:
+        #    pass
 
     def __addTrainingFrame(self):
         self.frames.append(frames.Frame("both"))

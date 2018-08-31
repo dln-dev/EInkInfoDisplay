@@ -3,7 +3,7 @@
 
 from abc import ABCMeta, abstractmethod
 #import epd4in2b
-#from PIL import Image
+from PIL import Image
 from PIL import ImageFont
 #from PIL import ImageDraw
 
@@ -204,6 +204,48 @@ class Text(Shape):
                            self.text, font = self.font, fill = self.fill)
 
 
+class Picture(Rect):
+    def __init__(self, \
+                 upperLeftCoords, \
+                 lowerRightCoords, \
+                 color, \
+                 fill, \
+                 outline, \
+                 blackImg, \
+                 redImg):
+        Rect.__init__(self, upperLeftCoords, lowerRightCoords, color, fill, outline)
+        # bmps must be inverted and monochrome (convert -monochrome)
+        self.blackImg = Image.open('Images/'+blackImg+'.bmp').convert('1')
+        self.redImg   = Image.open('Images/'+ redImg +'.bmp').convert('1')
+
+#frame_black = epd.get_frame_buffer(Image.open('black.bmp'))
+    #frame_red = epd.get_frame_buffer(Image.open('red.bmp'))
+    #epd.display_frame(frame_black, frame_red)
+
+    def setImgNames(self, blackImg, redImg):
+        self.blackImg = Image.open('Images/'+blackImg+'.bmp').convert('1')
+        self.redImg = Image.open('Images/'+redImg+'.bmp').convert('1')
+
+    def invert(self, color):
+        if color == "black":
+            pass
+        elif color == "red":
+            pass
+        elif color == "both":
+            pass
+        else:
+            raise(ValueError("Unrecognized color %s", color))
+
+    def switch(self):
+        tmp = self.blackImg
+        self.blackImg = self.redImg
+        self.redImg = tmp
+
+    def draw(self, blackImg, redImg):
+        redImg.bitmap(  (self.coords[0],self.coords[1]), self.redImg, 0)
+        blackImg.bitmap((self.coords[0],self.coords[1]), self.blackImg, 0)
+
+
 class Table(Rect):
     def __init__(self, \
                  upperLeftCoords, \
@@ -258,6 +300,10 @@ class Table(Rect):
             self.entries.append(shape)
         else:
             print("Table full")
+
+    def addShapes(self, shapes):
+        for shape in shapes:
+            self.addShape(shape)
 
     def addBackground(self, color, fill, outline):
         self.background = Table((self.coords[0], self.coords[1]), \
