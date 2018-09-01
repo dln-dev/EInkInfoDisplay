@@ -15,30 +15,18 @@ class EVI():
         self.__currentFrame = 0
         self.frames[0].display()
 
-    def __addInnerWeatherFrame(self):
-        self.frames.append(frames.Frame("both"))
-        # setup graphics
-
-    def updateInnerWeather(self):
-        td = datetime.datetime.utcnow() - self.innerWeatherLastUpdate
-        if td.seconds < 700:
-            self.innerWeatherLastUpdate = datetime.datetime.utcnow()
-        else:
-            pass
 
     def addFrame(self, frameType, params):
         if frameType in ["start", "Start"]:
             self.frames.append(StartFrame(*params))
         elif frameType in ["weather", "Weather"]:
             self.frames.append(WeatherFrame(*params))
+        elif frameType in ["training", "Training"]:
+            self.frames.append(TrainingFrame(*params))
         elif frameType in ["pushup", "pushups", "Pushup", "Pushups"]:
             self.frames.append(PushupFrame(*params))
         else:
             raise(ValueError("unrecognized frame type %s", frameType))
-
-
-    def __addTrainingFrame(self):
-        self.frames.append(frames.Frame("both"))
 
 
     def __refresh(self):
@@ -117,12 +105,6 @@ class WeatherFrame(frames.Frame):
                                  "black", 0, 0, "Icons/temp_black", "Icons/temp_red")
  
         # setup texts, last 6 are placeholders
-        #sideTable.addShapes([shapes.Text('sunrise', (0,0), "black", 12, 0), \
-        #                   shapes.Text('sunset ', (0,0), "black", 12, 0), \
-        #                   shapes.Text('pressure', (0,0), "black", 12, 0), \
-        #                   shapes.Text('humidity', (0,0), "black", 12, 0), \
-        #                   shapes.Text('wind speed', (0,0), "black", 12, 0), \
-        #                   shapes.Text('wind direction', (0,0), "black", 12, 0), \
         sideTable.addShapes([shapes.Picture((0,0), (50,50), "black", 0, 0, \
                              "Icons/sunrise_black", "Icons/sunrise_red"), \
                            shapes.Picture((0, 0), (50, 50), "black", 0, 0, \
@@ -195,6 +177,42 @@ class WeatherFrame(frames.Frame):
 #        self.__refresh()
         #else:
         #    pass
+
+
+class InsideClimateFrame(frames.Frame):
+    def __init__(self, colors):
+        frames.Frame.__init__(self, colors)
+
+        self.addShape(shapes.Text("TBD", (200, 150), "black", 0, 0))
+
+
+class TrainingFrame(frames.Frame):
+    def __init__(self, colors, programName):
+        frames.Frame.__init__(self, colors)
+        # plan: sqlite db with marking of last performed exercise, then fill 
+        # with current tbd exercises for the week, swipe down for done
+        self.__programName = programName
+
+        titleRect = shapes.Rect((0, 0), (frames.WIDTH, frames.HEIGHT // 6), "red", 0, 0)
+        titleText = shapes.Text("Big 6", titleRect.getCenter(), "red", 24, 255)
+        table = shapes.Table((0, frames.HEIGHT // 6), (frames.WIDTH - 1, frames.HEIGHT - 1), \
+                             "black", 255, 0, 5, 6)
+
+        table.addShapes([shapes.Picture((0, 0), (50, 50), "black", 0, 0, \
+                         "Training/squats_black", "Training/squats_red"), \
+                         shapes.Picture((0, 0), (50, 50), "black", 0, 0, \
+                         "Training/handstand_black", "Training/handstand_red"), \
+                         shapes.Picture((0, 0), (50, 50), "black", 0, 0, \
+                         "Training/legraise_black", "Training/legraise_red"), \
+                         shapes.Picture((0, 0), (50, 50), "black", 0, 0, \
+                         "Training/bridge_black", "Training/bridge_red"), \
+                         shapes.Picture((0, 0), (50, 50), "black", 0, 0, \
+                         "Training/pushups_black", "Training/pushups_red"), \
+                         shapes.Picture((0, 0), (50, 50), "black", 0, 0, \
+                         "Training/pullup_black", "Training/pullup_red") \
+                        ])
+
+        self.addShapes([titleRect, titleText, table])
 
 
 class PushupFrame(frames.Frame):
