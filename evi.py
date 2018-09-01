@@ -106,31 +106,46 @@ class WeatherFrame(frames.Frame):
                             (frames.WIDTH, frames.HEIGHT), "black", 255, 0)
         city = shapes.Text('City', (frames.WIDTH // 2, 23), "black", 25, 255)
         date = shapes.Text('Date: ', (frames.WIDTH // 2, 55), "black", 25, 255)
-        temp = shapes.Text('Temperature: ', (200, 160), "black", 24, 0)
-        clouds = shapes.Text('Clouds: ', (200, 175), "black", 20, 0)
-        weather = shapes.Text('weatherDesc', (200, 210), "black", 20, 0)
+        temp = shapes.Text('Temperature: ', (225, frames.HEIGHT // 4 + 30), "black", 24, 0)
+        clouds = shapes.Text('Clouds: ', (200, 200), "black", 20, 0)
+        weather = shapes.Text('weatherDesc', (335, 200), "black", 20, 0)
         weatherMain = shapes.Picture((frames.WIDTH - 160, frames.HEIGHT // 4 - 20), \
                                (frames.WIDTH, frames.HEIGHT // 4 + 160 - 20), \
-                               "black", 0, 0, "10d_black", "10d_red") 
+                               "black", 0, 0, "OWM/10d_black", "OWM/10d_red")
+        tempSym = shapes.Picture((frames.WIDTH // 3, frames.HEIGHT // 4 + 10), \
+                                 (frames.WIDTH // 3 + 50, frames.HEIGHT // 4 + 50 + 10), \
+                                 "black", 0, 0, "Icons/temp_black", "Icons/temp_red")
  
         # setup texts, last 6 are placeholders
-        sideTable.addShapes([shapes.Text('sunrise', (0,0), "black", 12, 0), \
-                           shapes.Text('sunset ', (0,0), "black", 12, 0), \
-                           shapes.Text('pressure', (0,0), "black", 12, 0), \
-                           shapes.Text('humidity', (0,0), "black", 12, 0), \
-                           shapes.Text('wind speed', (0,0), "black", 12, 0), \
-                           shapes.Text('wind direction', (0,0), "black", 12, 0), \
-                           shapes.Text('sunr', (0,0), "black", 12, 0), \
-                           shapes.Text('suns', (0,0), "black", 12, 0), \
-                           shapes.Text('press', (0,0), "black", 12, 0), \
-                           shapes.Text('humid', (0,0), "black", 12, 0), \
-                           shapes.Text('win', (0,0), "black", 12, 0), \
-                           shapes.Text('windir', (0,0), "black", 12, 0)])
+        #sideTable.addShapes([shapes.Text('sunrise', (0,0), "black", 12, 0), \
+        #                   shapes.Text('sunset ', (0,0), "black", 12, 0), \
+        #                   shapes.Text('pressure', (0,0), "black", 12, 0), \
+        #                   shapes.Text('humidity', (0,0), "black", 12, 0), \
+        #                   shapes.Text('wind speed', (0,0), "black", 12, 0), \
+        #                   shapes.Text('wind direction', (0,0), "black", 12, 0), \
+        sideTable.addShapes([shapes.Picture((0,0), (50,50), "black", 0, 0, \
+                             "Icons/sunrise_black", "Icons/sunrise_red"), \
+                           shapes.Picture((0, 0), (50, 50), "black", 0, 0, \
+                             "Icons/sunset_black", "Icons/sunset_red"), \
+                           shapes.Picture((0, 0), (50, 50), "black", 0, 0, \
+                             "Icons/pressure_black", "Icons/pressure_red"), \
+                           shapes.Picture((0, 0), (50, 50), "black", 0, 0, \
+                             "Icons/humidity_black", "Icons/humidity_red"), \
+                           shapes.Picture((0, 0), (50, 50), "black", 0, 0, \
+                             "Icons/windspeed_black", "Icons/windspeed_red"), \
+                           shapes.Picture((0, 0), (50, 50), "black", 0, 0, \
+                             "Icons/winddir_black", "Icons/winddir_red"), \
+                           shapes.Text('sunr', (0,0), "black", 16, 0), \
+                           shapes.Text('suns', (0,0), "black", 16, 0), \
+                           shapes.Text('press', (0,0), "black", 16, 0), \
+                           shapes.Text('humid', (0,0), "black", 16, 0), \
+                           shapes.Text('win', (0,0), "black", 16, 0), \
+                           shapes.Text('n/a', (0,0), "black", 16, 0)])
 
-        sideTable.addBackground("black", 255, 0)
+        sideTable.addBackground("black", 255, 255)
 
         self.addShapes([titleRect, sideTable, mainRect, bottomRect, city, date, \
-                                   temp, clouds, weather, weatherMain])
+                                   temp, clouds, weather, weatherMain, tempSym])
             
         self.updateWeather()
 
@@ -152,10 +167,10 @@ class WeatherFrame(frames.Frame):
         self.getShape(7).setText('clouds: ' + \
                         str(self.__currentWeather["clouds"]["all"]) + '%')
         self.getShape(8).setText(str(self.__currentWeather["weather"][0]["description"]))
-        self.getShape(9).setImgNames(self.__currentWeather["weather"][0]["icon"]\
-                                                + "_black", \
-                                                self.__currentWeather["weather"][0]["icon"]\
-                                                + "_red")
+        self.getShape(9).setImgNames("OWM/" + self.__currentWeather["weather"][0]["icon"]\
+                                        + "_black", \
+                                     "OWM/" + self.__currentWeather["weather"][0]["icon"]\
+                                        + "_red")
         
         self.getShape(1).getEntry(6).setText( \
                 datetime.datetime.utcfromtimestamp(\
