@@ -183,9 +183,13 @@ class Text(Shape):
         self.fontsize = fontsize
         self.font = ImageFont.truetype('/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf', self.fontsize)
         self.text = text
+        self.upperLeftCoords = (-1, -1) # unfortunately, this can really onl be set in draw()
 
     def setCenter(self, center):
         self.setBaseCoords(center)
+
+    def setUpperLeftCoords(self, coords):
+        self.upperLeftCoords = coords
 
     def setText(self, text):
         self.text = text
@@ -194,6 +198,10 @@ class Text(Shape):
         return self.baseCoords
 
     def draw(self, blackImg, redImg):
+        if self.upperLeftCoords != (-1, -1): # apply shift if upperLeftCoords is set
+            self.setCenter(\
+                    (self.upperLeftCoords[0] + redImg.textsize(self.text, font = self.font)[0] // 2, \
+                     self.upperLeftCoords[1] + redImg.textsize(self.text, font = self.font)[1] // 2))
         if self.color == "red":
             redImg.text((self.baseCoords[0] - redImg.textsize(self.text, font = self.font)[0] // 2, \
                          self.baseCoords[1] - redImg.textsize(self.text, font = self.font)[1] // 2), \

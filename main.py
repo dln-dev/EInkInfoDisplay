@@ -24,17 +24,17 @@
  # THE SOFTWARE.
  ##
 
-import shapes
-import frames
 import evi 
-#import click
 
 def main():
 
-
     program = evi.EVI()
-    
+
+    program.addFrame("weather", ["both", "524901"] )
+    program.addFrame("pushup", ["both"])
+
     program.start() # start display loop
+
 
 if __name__ == '__main__':
     main()
