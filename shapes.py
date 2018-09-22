@@ -176,7 +176,7 @@ class Ellipse(Rect):
 
 
 
-
+# TODO: undocumented, but font.getsize(text) gets size...
 class Text(Shape):
     def __init__(self, text, center, color, fontsize, fill):
         Shape.__init__(self, center, color, fill)
@@ -362,14 +362,16 @@ class Table(Rect):
         return self.entries[place]
 
     def __drawOutline(self, blackImg, redImg):
-        if self.rectHeight * self.dimY > self.coords[3] - self.coords[1]:
+        if self.rectHeight * self.dimY > self.coords[3] - self.coords[1] \
+                and self.background:
             if self.color == "red":
                 redImg.line([(self.coords[0], self.coords[3]), \
                              (self.coords[2], self.coords[3])], 0, 1)
             else:
                 blackImg.line([(self.coords[0], self.coords[3]), \
                              (self.coords[2], self.coords[3])], 0, 1)
-        if self.rectWidth * self.dimX > self.coords[2] - self.coords[0]:
+        if self.rectWidth * self.dimX > self.coords[2] - self.coords[0] \
+                and self.background:
             if self.color == "red":
                 redImg.line(self.coords, 0, 1)
             else:

@@ -193,24 +193,53 @@ class TrainingFrame(frames.Frame):
         # with current tbd exercises for the week, swipe down for done
         self.__programName = programName
 
-        titleRect = shapes.Rect((0, 0), (frames.WIDTH, frames.HEIGHT // 6), "red", 0, 0)
+        titleRect = shapes.Rect((0, 0), (frames.WIDTH, frames.HEIGHT // 8), "red", 0, 0)
         titleText = shapes.Text("Big 6", titleRect.getCenter(), "red", 24, 255)
-        table = shapes.Table((0, frames.HEIGHT // 6), (frames.WIDTH - 1, frames.HEIGHT - 1), \
+        table = shapes.Table((0, frames.HEIGHT // 8 + 1), (frames.WIDTH - 1, frames.HEIGHT - 1), \
                              "black", 255, 0, 5, 6)
 
-        table.addShapes([shapes.Picture((0, 0), (50, 50), "black", 0, 0, \
+        table.addShapes([shapes.Picture((0, 0), (39, 39), "black", 0, 0, \
                          "Training/squats_black", "Training/squats_red"), \
-                         shapes.Picture((0, 0), (50, 50), "black", 0, 0, \
+                         shapes.Picture((0, 0), (39, 39), "black", 0, 0, \
                          "Training/handstand_black", "Training/handstand_red"), \
-                         shapes.Picture((0, 0), (50, 50), "black", 0, 0, \
+                         shapes.Picture((0, 0), (39, 39), "black", 0, 0, \
                          "Training/legraise_black", "Training/legraise_red"), \
-                         shapes.Picture((0, 0), (50, 50), "black", 0, 0, \
+                         shapes.Picture((0, 0), (39, 39), "black", 0, 0, \
                          "Training/bridge_black", "Training/bridge_red"), \
-                         shapes.Picture((0, 0), (50, 50), "black", 0, 0, \
+                         shapes.Picture((0, 0), (39, 39), "black", 0, 0, \
                          "Training/pushups_black", "Training/pushups_red"), \
-                         shapes.Picture((0, 0), (50, 50), "black", 0, 0, \
+                         shapes.Picture((0, 0), (39, 39), "black", 0, 0, \
                          "Training/pullup_black", "Training/pullup_red") \
                         ])
+        table.addShape(shapes.Text("1 floor", (0, 0), "black", 14, 0))
+        table.addShape(shapes.Text("1 head ", (0, 0), "black", 14, 0))
+        table.addShape(shapes.Text("1 tucks", (0, 0), "black", 14, 0))
+        table.addShape(shapes.Text("1 short", (0, 0), "black", 14, 0))
+        table.addShape(shapes.Text("1 wall ", (0, 0), "black", 14, 0))
+        table.addShape(shapes.Text("0 dbell", (0, 0), "black", 14, 0))
+
+        table.addShape(shapes.Text("25,25,25", (0, 0), "black", 14, 0))
+        table.addShape(shapes.Text("30 sec.", (0, 0), "black", 14, 0))
+        table.addShape(shapes.Text("12,12,7", (0, 0), "black", 14, 0))
+        table.addShape(shapes.Text("12,12,12", (0, 0), "black", 14, 0))
+        table.addShape(shapes.Text("15,10,0", (0, 0), "black", 14, 0))
+        table.addShape(shapes.Text("12,12,0", (0, 0), "black", 14, 0))
+
+        table.addShape(shapes.Text("30,30,30", (0, 0), "black", 14, 0))
+        table.addShape(shapes.Text("40 sec.", (0, 0), "black", 14, 0))
+        table.addShape(shapes.Text("14,14,10", (0, 0), "black", 14, 0))
+        table.addShape(shapes.Text("14,14,14", (0, 0), "black", 14, 0))
+        table.addShape(shapes.Text("15,15,0", (0, 0), "black", 14, 0))
+        table.addShape(shapes.Text("14,14,0", (0, 0), "black", 14, 0))
+
+
+        for i in range(0, 1):
+            table.addShape(shapes.Text("50,50,50", (0, 0), "red", 14, 0))
+            table.addShape(shapes.Text("2 min.", (0, 0), "red", 14, 0))
+            table.addShape(shapes.Text("40,40,40", (0, 0), "red", 14, 0))
+            table.addShape(shapes.Text("50,50,50", (0, 0), "red", 14, 0))
+            table.addShape(shapes.Text("50,50,50", (0, 0), "red", 14, 0))
+            table.addShape(shapes.Text("40,40,40", (0, 0), "red", 14, 0))
 
         self.addShapes([titleRect, titleText, table])
 
