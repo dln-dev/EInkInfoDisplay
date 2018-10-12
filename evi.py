@@ -6,6 +6,7 @@ import datetime
 import requests
 import click
 import json # only for testing
+from dht import getIC
 
 
 class EVI():
@@ -21,6 +22,8 @@ class EVI():
             self.frames.append(StartFrame(*params))
         elif frameType in ["weather", "Weather"]:
             self.frames.append(WeatherFrame(*params))
+        elif frameType in ["innerclimate", "InnerClimate"]:
+            self.frames.append(InnerClimateFrame(*params))
         elif frameType in ["training", "Training"]:
             self.frames.append(TrainingFrame(*params))
         elif frameType in ["pushup", "pushups", "Pushup", "Pushups"]:
@@ -179,11 +182,36 @@ class WeatherFrame(frames.Frame):
         #    pass
 
 
-class InsideClimateFrame(frames.Frame):
+class InnerClimateFrame(frames.Frame):
     def __init__(self, colors):
         frames.Frame.__init__(self, colors)
+        self.__data = getIC()
 
-        self.addShape(shapes.Text("TBD", (200, 150), "black", 0, 0))
+        titleRect = shapes.Rect((0, 0), (frames.WIDTH, frames.HEIGHT // 4), "black", 0, 0)
+        title = shapes.Text('Inner Climate', (frames.WIDTH // 2, 23), "black", 25, 255)
+        mainTable = shapes.Table((0, frames.HEIGHT // 4), (frames.WIDTH, frames.HEIGHT), \
+                             "black", 255, 0, 2, 2)
+
+        #self.addShape(shapes.Text("TBD", (200, 150), "black", 0, 0))
+        mainTable.addShapes([shapes.Picture((0, 0), (0, 0), \
+                                 "black", 0, 0, "Icons/temp_black", "Icons/temp_red"), \
+                        shapes.Picture((0, 0), (0, 0), "black", 0, 0, \
+                                 "Icons/humidity_black", "Icons/humidity_red"), \
+                        shapes.Text('temp', (0,0), "black", 16, 0), \
+                        shapes.Text('press', (0,0), "black", 16, 0)])
+
+        mainTable.addBackground("black", 255, 255)
+
+        self.addShapes([titleRect, title, mainTable])
+
+        self.updateInnerClimate()
+
+    def updateInnerClimate(self):
+        self.__data = getIC()
+
+        self.getShape(2).getEntry(2).setText(str(round(self.__data[1],1)))
+        self.getShape(2).getEntry(3).setText(str(self.__data[0]))
+
 
 
 class TrainingFrame(frames.Frame):
